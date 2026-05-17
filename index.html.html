@@ -1,0 +1,427 @@
+
+<h2 class="sr-only">Système de matching entrepreneuriat universitaire — interface interactive de dépôt de projet et recherche de profils</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.hub { padding: 1.5rem 0; }
+.tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+.tab { padding: 8px 18px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; cursor: pointer; font-size: 14px; color: var(--color-text-secondary); font-family: var(--font-sans); transition: all 0.15s; }
+.tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); font-weight: 500; }
+.tab:hover:not(.active) { background: var(--color-background-secondary); }
+.panel { display: none; }
+.panel.active { display: block; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.card-accent-teal { border-left: 3px solid #1D9E75; border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) 0; }
+.card-accent-purple { border-left: 3px solid #7F77DD; border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) 0; }
+.card-accent-amber { border-left: 3px solid #EF9F27; border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) 0; }
+label { font-size: 13px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; margin-top: 12px; }
+label:first-child { margin-top: 0; }
+input, select, textarea { width: 100%; font-family: var(--font-sans); font-size: 14px; }
+textarea { height: 80px; resize: vertical; }
+.tag-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.tag { padding: 4px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); font-size: 12px; cursor: pointer; color: var(--color-text-secondary); background: transparent; font-family: var(--font-sans); transition: all 0.15s; }
+.tag.selected { background: #E1F5EE; color: #0F6E56; border-color: #5DCAA5; }
+.tag.selected-purple { background: #EEEDFE; color: #534AB7; border-color: #AFA9EC; }
+.tag.selected-amber { background: #FAEEDA; color: #854F0B; border-color: #EF9F27; }
+.btn { padding: 9px 20px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; cursor: pointer; font-size: 14px; font-family: var(--font-sans); color: var(--color-text-primary); transition: all 0.15s; }
+.btn:hover { background: var(--color-background-secondary); }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: #1D9E75; color: white; border-color: #1D9E75; font-weight: 500; }
+.btn-primary:hover { background: #0F6E56; }
+.section-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 12px; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.badge-teal { background: #E1F5EE; color: #0F6E56; }
+.badge-purple { background: #EEEDFE; color: #534AB7; }
+.badge-amber { background: #FAEEDA; color: #854F0B; }
+.badge-coral { background: #FAECE7; color: #993C1D; }
+.badge-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.profile-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 14px; flex-shrink: 0; }
+.av-teal { background: #E1F5EE; color: #0F6E56; }
+.av-purple { background: #EEEDFE; color: #534AB7; }
+.av-amber { background: #FAEEDA; color: #854F0B; }
+.av-coral { background: #FAECE7; color: #993C1D; }
+.av-blue { background: #E6F1FB; color: #185FA5; }
+.match-score { font-size: 22px; font-weight: 500; }
+.match-bar { height: 4px; background: var(--color-background-secondary); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+.match-fill { height: 100%; border-radius: 2px; background: #1D9E75; }
+.step-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.step-row:last-child { border-bottom: none; }
+.step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.result-panel { margin-top: 1.5rem; }
+.sep { height: 0.5px; background: var(--color-border-tertiary); margin: 1rem 0; }
+.row { display: flex; align-items: center; gap: 10px; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.stat { text-align: center; padding: 0.75rem; background: var(--color-background-secondary); border-radius: var(--border-radius-md); }
+.stat-num { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.stat-label { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+</style>
+
+<div class="hub">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('depot')"><i class="ti ti-plus" aria-hidden="true"></i> Déposer un projet</button>
+    <button class="tab" onclick="switchTab('profil')"><i class="ti ti-user" aria-hidden="true"></i> Créer mon profil</button>
+    <button class="tab" onclick="switchTab('explorer')"><i class="ti ti-search" aria-hidden="true"></i> Explorer les projets</button>
+    <button class="tab" onclick="switchTab('process')"><i class="ti ti-arrows-exchange" aria-hidden="true"></i> Comment ça marche</button>
+  </div>
+
+  <!-- DEPOT DE PROJET -->
+  <div class="panel active" id="panel-depot">
+    <div class="grid2">
+      <div>
+        <p class="section-title">Informations du projet</p>
+        <div class="card">
+          <label>Nom du projet</label>
+          <input type="text" id="proj-nom" placeholder="Ex : AgroConnect Sénégal">
+          <label>Secteur d'activité</label>
+          <select id="proj-secteur">
+            <option value="">-- Choisir --</option>
+            <option>Agritech</option>
+            <option>Santé / Medtech</option>
+            <option>Éducation / Edtech</option>
+            <option>Fintech / Finance</option>
+            <option>Commerce / Retail</option>
+            <option>Environnement / GreenTech</option>
+            <option>Transport / Logistique</option>
+            <option>Tourisme / Cultura</option>
+            <option>Autre</option>
+          </select>
+          <label>Stade du projet</label>
+          <div class="tag-grid" id="stade-tags">
+            <button class="tag" onclick="selectOne(this,'stade-tags','selected')">💡 Idée</button>
+            <button class="tag" onclick="selectOne(this,'stade-tags','selected')">🛠 En développement</button>
+            <button class="tag" onclick="selectOne(this,'stade-tags','selected')">🚀 MVP prêt</button>
+          </div>
+          <label style="margin-top:14px">Description courte</label>
+          <textarea id="proj-desc" placeholder="Quel problème tu résous ? Pour qui ?"></textarea>
+        </div>
+      </div>
+      <div>
+        <p class="section-title">Profils recherchés</p>
+        <div class="card">
+          <label>Compétences manquantes dans l'équipe</label>
+          <div class="tag-grid" id="besoin-tags">
+            <button class="tag" onclick="toggleTag(this,'selected')">Développement web</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Design / UX</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Marketing digital</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Droit des affaires</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Finance / Compta</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">IA / Data science</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Communication</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Gestion de projet</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Santé / Médecine</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Agronomie</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Architecture</button>
+            <button class="tag" onclick="toggleTag(this,'selected')">Sciences sociales</button>
+          </div>
+          <label style="margin-top:14px">Engagement attendu</label>
+          <div class="tag-grid" id="engage-tags">
+            <button class="tag" onclick="selectOne(this,'engage-tags','selected')">2–4h / semaine</button>
+            <button class="tag" onclick="selectOne(this,'engage-tags','selected')">5–10h / semaine</button>
+            <button class="tag" onclick="selectOne(this,'engage-tags','selected')">Temps plein</button>
+          </div>
+          <div style="margin-top: 1rem; text-align: right;">
+            <button class="btn btn-primary" onclick="lancerMatching()">Lancer le matching ↗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="result-panel" id="matching-result" style="display:none">
+      <div class="sep"></div>
+      <p class="section-title"><i class="ti ti-sparkles" aria-hidden="true"></i> Profils suggérés pour ton projet</p>
+      <div class="grid3" id="profils-result"></div>
+    </div>
+  </div>
+
+  <!-- PROFIL ETUDIANT -->
+  <div class="panel" id="panel-profil">
+    <div class="grid2">
+      <div>
+        <p class="section-title">Ton profil académique</p>
+        <div class="card">
+          <label>Prénom & Nom</label>
+          <input type="text" placeholder="Ex : Fatou Diallo">
+          <label>UFR / École</label>
+          <select>
+            <option value="">-- Choisir --</option>
+            <option>UFR Sciences et Technologies</option>
+            <option>UFR Sciences Économiques et Gestion</option>
+            <option>UFR Sciences Juridiques et Politiques</option>
+            <option>UFR Lettres et Sciences Humaines</option>
+            <option>UFR Sciences de la Santé</option>
+            <option>École Polytechnique</option>
+            <option>École de Commerce</option>
+            <option>Institut de Formation en Agronomie</option>
+            <option>Autre</option>
+          </select>
+          <label>Niveau</label>
+          <div class="tag-grid" id="niveau-tags">
+            <button class="tag" onclick="selectOne(this,'niveau-tags','selected')">Licence 1</button>
+            <button class="tag" onclick="selectOne(this,'niveau-tags','selected')">Licence 2</button>
+            <button class="tag" onclick="selectOne(this,'niveau-tags','selected')">Licence 3</button>
+            <button class="tag" onclick="selectOne(this,'niveau-tags','selected')">Master 1</button>
+            <button class="tag" onclick="selectOne(this,'niveau-tags','selected')">Master 2</button>
+            <button class="tag" onclick="selectOne(this,'niveau-tags','selected')">Doctorat</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="section-title">Tes compétences & disponibilité</p>
+        <div class="card">
+          <label>Compétences (sélectionne tout ce qui te correspond)</label>
+          <div class="tag-grid" id="comp-tags">
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">Développement web</button>
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">Design / UX</button>
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">Marketing digital</button>
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">Droit des affaires</button>
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">Finance / Compta</button>
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">IA / Data science</button>
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">Communication</button>
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">Gestion de projet</button>
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">Médecine / Santé</button>
+            <button class="tag" onclick="toggleTag(this,'selected-purple')">Agronomie</button>
+          </div>
+          <label style="margin-top:14px">Rôle souhaité</label>
+          <div class="tag-grid" id="role-tags">
+            <button class="tag" onclick="selectOne(this,'role-tags','selected-amber')">Porteur de projet</button>
+            <button class="tag" onclick="selectOne(this,'role-tags','selected-amber')">Contributeur</button>
+            <button class="tag" onclick="selectOne(this,'role-tags','selected-amber')">Les deux</button>
+          </div>
+          <label style="margin-top:14px">Disponibilité / semaine</label>
+          <div class="tag-grid" id="dispo-tags">
+            <button class="tag" onclick="selectOne(this,'dispo-tags','selected')">2–4h</button>
+            <button class="tag" onclick="selectOne(this,'dispo-tags','selected')">5–10h</button>
+            <button class="tag" onclick="selectOne(this,'dispo-tags','selected')">+10h</button>
+          </div>
+          <div style="margin-top: 1rem; text-align: right;">
+            <button class="btn btn-primary" onclick="saveProfile()">Rejoindre le vivier ↗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="profil-confirm" style="display:none; margin-top:1rem;">
+      <div class="card card-accent-teal">
+        <div class="row">
+          <i class="ti ti-check" style="color:#1D9E75; font-size:20px" aria-hidden="true"></i>
+          <div>
+            <p style="font-size:14px; font-weight:500; color:var(--color-text-primary)">Profil ajouté au vivier !</p>
+            <p style="font-size:13px; color:var(--color-text-secondary)">La commission te contactera si ton profil correspond à un projet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPLORER PROJETS -->
+  <div class="panel" id="panel-explorer">
+    <div class="grid3" style="margin-bottom:1rem">
+      <div class="stat">
+        <div class="stat-num" style="color:#1D9E75">12</div>
+        <div class="stat-label">projets actifs</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" style="color:#534AB7">87</div>
+        <div class="stat-label">profils dans le vivier</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" style="color:#EF9F27">34</div>
+        <div class="stat-label">matchings réalisés</div>
+      </div>
+    </div>
+
+    <p class="section-title">Projets en recherche de contributeurs</p>
+    <div style="display:flex; flex-direction:column; gap:10px">
+
+      <div class="profile-card">
+        <div class="flex-between" style="margin-bottom:8px">
+          <div class="row">
+            <div class="avatar av-teal">AG</div>
+            <div>
+              <p style="font-size:14px; font-weight:500; color:var(--color-text-primary)">AgroConnect Sénégal</p>
+              <p style="font-size:12px; color:var(--color-text-secondary)">Mise en relation agriculteurs–acheteurs</p>
+            </div>
+          </div>
+          <span class="badge badge-teal">Agritech</span>
+        </div>
+        <div class="tag-grid">
+          <span class="badge badge-coral">Cherche : Dev web</span>
+          <span class="badge badge-coral">Cherche : Design UX</span>
+          <span class="badge badge-gray">🛠 En développement</span>
+        </div>
+        <div style="margin-top:10px; text-align:right">
+          <button class="btn" style="font-size:13px; padding:6px 14px" onclick="sendPrompt('Je veux en savoir plus sur le projet AgroConnect et comment y contribuer')">Voir le projet ↗</button>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="flex-between" style="margin-bottom:8px">
+          <div class="row">
+            <div class="avatar av-purple">MS</div>
+            <div>
+              <p style="font-size:14px; font-weight:500; color:var(--color-text-primary)">MediShare</p>
+              <p style="font-size:12px; color:var(--color-text-secondary)">Plateforme de partage de ressources médicales</p>
+            </div>
+          </div>
+          <span class="badge badge-purple">Medtech</span>
+        </div>
+        <div class="tag-grid">
+          <span class="badge badge-coral">Cherche : Droit santé</span>
+          <span class="badge badge-coral">Cherche : Finance</span>
+          <span class="badge badge-gray">💡 Idée</span>
+        </div>
+        <div style="margin-top:10px; text-align:right">
+          <button class="btn" style="font-size:13px; padding:6px 14px" onclick="sendPrompt('Je veux en savoir plus sur le projet MediShare et comment y contribuer')">Voir le projet ↗</button>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="flex-between" style="margin-bottom:8px">
+          <div class="row">
+            <div class="avatar av-amber">EF</div>
+            <div>
+              <p style="font-size:14px; font-weight:500; color:var(--color-text-primary)">EduFlex</p>
+              <p style="font-size:12px; color:var(--color-text-secondary)">Cours en ligne adaptés au contexte sénégalais</p>
+            </div>
+          </div>
+          <span class="badge badge-amber">Edtech</span>
+        </div>
+        <div class="tag-grid">
+          <span class="badge badge-coral">Cherche : Pédagogie</span>
+          <span class="badge badge-coral">Cherche : Communication</span>
+          <span class="badge badge-gray">🚀 MVP prêt</span>
+        </div>
+        <div style="margin-top:10px; text-align:right">
+          <button class="btn" style="font-size:13px; padding:6px 14px" onclick="sendPrompt('Je veux en savoir plus sur le projet EduFlex et comment y contribuer')">Voir le projet ↗</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROCESSUS -->
+  <div class="panel" id="panel-process">
+    <p class="section-title">Le parcours de matching en 5 étapes</p>
+    <div class="card">
+      <div class="step-row">
+        <div class="step-num" style="background:#E1F5EE; color:#0F6E56">1</div>
+        <div>
+          <p style="font-size:14px; font-weight:500; color:var(--color-text-primary)">Dépôt du projet</p>
+          <p style="font-size:13px; color:var(--color-text-secondary); margin-top:3px">Le porteur remplit la fiche projet et sélectionne les profils manquants dans son équipe.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#EEEDFE; color:#534AB7">2</div>
+        <div>
+          <p style="font-size:14px; font-weight:500; color:var(--color-text-primary)">Analyse par la commission</p>
+          <p style="font-size:13px; color:var(--color-text-secondary); margin-top:3px">Le pôle Compétences consulte le vivier et identifie 3 à 5 profils compatibles sous 72h.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#FAEEDA; color:#854F0B">3</div>
+        <div>
+          <p style="font-size:14px; font-weight:500; color:var(--color-text-primary)">Proposition de matching</p>
+          <p style="font-size:13px; color:var(--color-text-secondary); margin-top:3px">Les profils sélectionnés reçoivent une invitation et peuvent accepter ou décliner librement.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#E6F1FB; color:#185FA5">4</div>
+        <div>
+          <p style="font-size:14px; font-weight:500; color:var(--color-text-primary)">Réunion de découverte</p>
+          <p style="font-size:13px; color:var(--color-text-secondary); margin-top:3px">Un call ou rendez-vous facilité par la commission permet à l'équipe de se rencontrer.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#EAF3DE; color:#3B6D11">5</div>
+        <div>
+          <p style="font-size:14px; font-weight:500; color:var(--color-text-primary)">Intégration officielle</p>
+          <p style="font-size:13px; color:var(--color-text-secondary); margin-top:3px">Si la rencontre est concluante, le contributeur rejoint l'équipe. La commission suit l'avancement.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:1rem" class="grid2">
+      <div class="card card-accent-teal">
+        <p style="font-size:13px; font-weight:500; color:var(--color-text-primary); margin-bottom:4px"><i class="ti ti-shield-check" aria-hidden="true" style="color:#1D9E75"></i> Charte du contributeur</p>
+        <p style="font-size:12px; color:var(--color-text-secondary)">Tout contributeur signe une charte d'engagement définissant le rôle, les droits sur le projet et la confidentialité.</p>
+      </div>
+      <div class="card card-accent-purple">
+        <p style="font-size:13px; font-weight:500; color:var(--color-text-primary); margin-bottom:4px"><i class="ti ti-star" aria-hidden="true" style="color:#7F77DD"></i> Valorisation des contributeurs</p>
+        <p style="font-size:12px; color:var(--color-text-secondary)">Chaque contribution est documentée et valorisée dans un portfolio étudiant visible par tous.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.closest('.tab').classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function toggleTag(el, cls) {
+  if (el.classList.contains(cls)) {
+    el.classList.remove(cls);
+  } else {
+    el.classList.remove('selected','selected-purple','selected-amber');
+    el.classList.add(cls);
+  }
+}
+
+function selectOne(el, groupId, cls) {
+  document.querySelectorAll('#' + groupId + ' .tag').forEach(t => t.classList.remove('selected','selected-purple','selected-amber'));
+  el.classList.add(cls);
+}
+
+const mockProfiles = [
+  { init:'AM', av:'av-purple', nom:'Amadou M.', ufr:'UFR Sciences et Tech', comp:['Développement web','IA / Data science'], score:95 },
+  { init:'FD', av:'av-coral', nom:'Fatou D.', ufr:'École de Commerce', comp:['Marketing digital','Communication'], score:88 },
+  { init:'YB', av:'av-blue', nom:'Yacine B.', ufr:'UFR Sciences Juridiques', comp:['Droit des affaires'], score:82 },
+  { init:'KS', av:'av-teal', nom:'Khadim S.', ufr:'UFR Gestion', comp:['Finance / Compta'], score:79 },
+];
+
+function lancerMatching() {
+  const nom = document.getElementById('proj-nom').value || 'votre projet';
+  const besoins = [...document.querySelectorAll('#besoin-tags .tag.selected')].map(t => t.textContent.trim());
+  
+  const container = document.getElementById('profils-result');
+  container.innerHTML = '';
+  
+  const filtered = besoins.length > 0 
+    ? mockProfiles.filter(p => p.comp.some(c => besoins.includes(c))).concat(mockProfiles.filter(p => !p.comp.some(c => besoins.includes(c))))
+    : mockProfiles;
+
+  filtered.slice(0, 4).forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'profile-card';
+    div.innerHTML = `
+      <div class="row" style="margin-bottom:10px">
+        <div class="avatar ${p.av}">${p.init}</div>
+        <div>
+          <p style="font-size:13px; font-weight:500; color:var(--color-text-primary)">${p.nom}</p>
+          <p style="font-size:11px; color:var(--color-text-secondary)">${p.ufr}</p>
+        </div>
+      </div>
+      <div class="tag-grid" style="margin-bottom:8px">
+        ${p.comp.map(c => `<span class="badge badge-gray" style="font-size:11px">${c}</span>`).join('')}
+      </div>
+      <div class="flex-between">
+        <span style="font-size:11px; color:var(--color-text-secondary)">Compatibilité</span>
+        <span style="font-size:13px; font-weight:500; color:#1D9E75">${p.score}%</span>
+      </div>
+      <div class="match-bar"><div class="match-fill" style="width:${p.score}%"></div></div>
+      <button class="btn" style="width:100%; margin-top:10px; font-size:12px; padding:6px" onclick="sendPrompt('Mettre en relation avec ${p.nom} pour ${nom}')">Demander la mise en relation ↗</button>
+    `;
+    container.appendChild(div);
+  });
+
+  document.getElementById('matching-result').style.display = 'block';
+}
+
+function saveProfile() {
+  document.getElementById('profil-confirm').style.display = 'block';
+}
+</script>
